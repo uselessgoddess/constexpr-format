@@ -17,6 +17,26 @@ int main()
 }
 ```
 
+### Is this true at compile time?
+Yeah 
+```cpp
+#include "format.h" // include full library 
+
+int main()
+{
+    namespace fmt = constexpr_format; // short namespace alias 
+    using namespace fmt::literals; // for use ""_fmt literal
+
+    fmt::print("Hello {}!\n"_fmt, "world", "lol"); // static assertation failed
+    fmt::print("Hello {}!\n"_fmt); // static assertation failed
+    
+    // emm... in future ))
+    fmt::print("Hello { }!\n"_fmt, "world"); // static assertation failed
+    fmt::print("Hello {!\n"_fmt); // static assertation failed
+    // and others 
+}
+```
+
 ### Convert custom types to string
 
 #### std::string operator
