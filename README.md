@@ -14,6 +14,9 @@ int main()
     std::cout << fmt::format("Hello {}!"_fmt, "world") << std::endl;
     fmt::print("Hello {}!\n"_fmt, "world");
     fmt::println("Hello {}!"_fmt, "world");
+    
+    // can use
+    // fmt::print("Hello world!\n"_fmt);
 }
 ```
 
