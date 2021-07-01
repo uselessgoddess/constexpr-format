@@ -14,7 +14,9 @@ namespace constexpr_format
         template<typename F, std::size_t... Is>
         constexpr void for_each(F f, std::integer_sequence<std::size_t, Is...>)
         {
-            auto _ = { f(std::integral_constant<std::size_t, Is>{})... };
+            if constexpr (sizeof...(Is) != 0) {
+                auto _ = { f(std::integral_constant<std::size_t, Is>{})... };
+            }
         }
 
         template<typename Callable>
@@ -80,6 +82,10 @@ namespace constexpr_format
             constexpr std::string_view fmt = { string::value, sizeof(string::value) };
             constexpr auto slice = fmt.substr(start);
 
+            if constexpr (fmt.empty()) {
+                return std::array<std::size_t, 0>{};
+            }
+
             if constexpr (slice.find('{') != std::string_view::npos && start < fmt.size() - 1) {
                 return format_array_positions<slice.find('{') + 1 + start, count + 1, string>();
             } else {
@@ -104,7 +110,9 @@ namespace constexpr_format
             constexpr auto positions = format_array_positions<0, 0, string>();
             std::array<std::string_view, positions.size() + 1> array;
 
-            static_assert(positions.size() != 0);
+            if constexpr (positions.size() == 0) {
+                return std::array{fmt};
+            }
 
             array[0] = fmt.substr(0, fmt.find('{'));
             for (std::size_t i = 0; i < positions.size() - 1; i++) {
@@ -126,7 +134,7 @@ namespace constexpr_format
 
             for_constexpr<array.size() - 1>([&] <std::size_t i> (std::integral_constant<std::size_t, i>) {
                 result += array[i];
-                result += std::to_string(std::get<i>(std::tie(args...)));
+                result += details::to_string(std::get<i>(std::tie(args...)));
             });
             result += array.back();
 
@@ -173,13 +181,13 @@ namespace constexpr_format
     template<typename char_type, char_type... chars>
     void println(std::ostream& stream, details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
     {
-        stream << format(fmt, std::forward<decltype(args)>(args)...) << std::endl;
+        stream << format(fmt, std::forward<decltype(args)>(args)...) << "\n";
     }
 
     template<typename char_type, char_type... chars>
     void println(details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
     {
-        std::cout << format(fmt, std::forward<decltype(args)>(args)...) << std::endl;
+        std::cout << format(fmt, std::forward<decltype(args)>(args)...) << "\n";
     }
 }
 
