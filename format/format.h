@@ -49,18 +49,18 @@ namespace constexpr_format
         }
 
         std::string to_string(auto&& self)
-        requires std::convertible_to<decltype(self), std::string>
+            requires std::convertible_to<decltype(self), std::string>
         {
             return self;
         }
 
         std::string to_string(auto&& self)
-        requires
-        requires(std::stringstream& stream) { stream << self; }
-        and
-        (not std::is_arithmetic_v<std::remove_reference_t<decltype(self)>>)
-        and
-        (not std::convertible_to<decltype(self), std::string>)
+            requires
+                requires(std::stringstream& stream) { stream << self; }
+                 and
+                (not std::is_arithmetic_v<std::remove_reference_t<decltype(self)>>)
+                 and
+                (not std::convertible_to<decltype(self), std::string>)
         {
             std::stringstream stream;
             stream << self;
