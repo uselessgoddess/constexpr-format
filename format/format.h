@@ -128,7 +128,8 @@ namespace constexpr_format
         auto combine(auto&&... args)
         {
             constexpr auto array = format_array<string>();
-            static_assert(array.size() - 1 == sizeof...(args));
+            static_assert(array.size() - 1 == sizeof...(args),
+                "The number of arguments does not match the template of format-string");
 
             std::string result;
 
