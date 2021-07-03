@@ -192,4 +192,4 @@ namespace constexpr_format
     }
 }
 
-#endif //CONSTEXPR_FORMAT
+#endif // CONSTEXPR_FORMAT
