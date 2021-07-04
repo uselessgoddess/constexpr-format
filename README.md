@@ -125,7 +125,7 @@ struct formatable_pair
     T1 first;
     T2 second;
     
-    void fmt(fmt::formatter& fmt)
+    constexpr void fmt(fmt::formatter& fmt) noexcept
     {
         fmt.write_string(std::format("({}, {})"_fmt, first, second));
     }
@@ -134,7 +134,7 @@ struct formatable_pair
 template<fmt::formatable T1, fmt::formatable T2>
 struct fmt::to_string<std::pair<T1, T2>>
 {
-    void fmt(fmt::formatter& fmt, const std::pair<T1, T2>& self) const noexcept 
+    constexpr void fmt(fmt::formatter& fmt, const std::pair<T1, T2>& self) const noexcept 
     {
         fmt.write_string(std::format("({}, {})"_fmt, self.first, self.second));
     }
