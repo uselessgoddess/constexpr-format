@@ -97,7 +97,7 @@ namespace constexpr_format
             }
         }
 
-        constexpr auto parse_number(std::string_view slice)
+        constexpr auto parse_index(std::string_view slice)
         {
             std::size_t size = 0;
             std::size_t result = 0;
@@ -113,6 +113,7 @@ namespace constexpr_format
             }
 
             if (slice[size] != '}') {
+                // TODO: maybe use Rust-style Result
                 return std::size_t(-1);
             }
 
@@ -126,7 +127,7 @@ namespace constexpr_format
 
             for (std::size_t i = 0; i < fmt.size() - 1; i++) {
                 if (fmt[i] == '{') {
-                    auto parsed = parse_number(fmt.substr(i + 1));
+                    auto parsed = parse_index(fmt.substr(i + 1));
                     if (parsed == std::size_t(-1)) {
                         without_indexes = true;
                     } else {
@@ -171,7 +172,7 @@ namespace constexpr_format
                 std::size_t last = 0;
                 for (std::size_t i = 0; i < fmt.size() - 1; i++) {
                     if (fmt[i] == '{') {
-                        auto parsed = parse_number(fmt.substr(i + 1));
+                        auto parsed = parse_index(fmt.substr(i + 1));
                         if (parsed == std::size_t(-1)) {
                             array[last] = {i, last};
                         } else {
