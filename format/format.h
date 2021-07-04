@@ -353,10 +353,10 @@ namespace constexpr_format
     }
 
     template<typename char_type, char_type... chars>
-    void print(std::basic_ostream<char_type>& out, details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
+    void print(std::basic_ostream<char_type>& stream, details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
         noexcept(noexcept(format(fmt, std::forward<decltype(args)>(args)...)))
     {
-        out << format(fmt, std::forward<decltype(args)>(args)...);
+        stream << format(fmt, std::forward<decltype(args)>(args)...);
     }
 
     template<typename char_type, char_type... chars>
