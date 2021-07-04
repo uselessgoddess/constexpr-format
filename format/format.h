@@ -22,37 +22,40 @@ namespace constexpr_format
 
         inline namespace constexpr_for
         {
-            template<typename F, std::size_t... Is>
-            constexpr void for_each(F f, std::integer_sequence<std::size_t, Is...>)
+            enum class control_flow
             {
-                if constexpr (sizeof...(Is) != 0) {
-                    [[maybe_unused]] auto _ = { f(std::integral_constant<std::size_t, Is>{})... };
+                // Mmm... payed control flows
+                $continue,
+                $break,
+            };
+
+            template<std::size_t I, std::size_t N>
+            constexpr auto for_each(auto f, std::pair<std::size_t, std::size_t> result)
+            {
+                if constexpr (I != N) {
+                    using result_type = decltype(f(std::integral_constant<std::size_t, I>{}));
+                    if constexpr (std::same_as<result_type, control_flow>) {
+                        auto condition = f(std::integral_constant<std::size_t, I>{});
+                        switch (condition) {
+                            case control_flow::$break:
+                                return for_each<N, N>(f, {I, N});
+                            case control_flow::$continue:
+                                return for_each<I + 1, N>(f, {I + 1, N});
+                        }
+                    } else {
+                        f(std::integral_constant<std::size_t, I>{});
+                        return for_each<I + 1, N>(f, {I + 1, N});
+                    }
+                } else {
+                    return result;
                 }
             }
 
-            template<typename Callable>
-            struct lambda
-            {
-                Callable func;
-
-                template<std::size_t N>
-                constexpr std::size_t operator()(std::integral_constant<std::size_t, N>) const
-                {
-                    func(std::integral_constant<std::size_t, N>{});
-                    return 0;
-                }
-            };
-
             template<std::size_t N>
-            constexpr std::nullptr_t for_constexpr(auto&& func)
-            // FIXME: requires requires { func(std::size_t{}); }
+            constexpr auto for_constexpr(auto&& func)
+            // FIXME: requires requires { func(std::integral_constant...}); }
             {
-                for_each(
-                    lambda<decltype(func)>{std::forward<decltype(func)>(func)},
-                    std::make_integer_sequence<std::size_t, N>{}
-                );
-
-                return {};
+                return for_each<0, N>(std::forward<decltype(func)>(func), {0, N});
             }
         }
 
@@ -91,34 +94,6 @@ namespace constexpr_format
             constexpr auto size(std::integral auto number)
             {
                 return (std::size_t)log10(number) + 1;
-            }
-        }
-
-        inline namespace string_conversion
-        {
-            std::string to_string(auto self)
-            requires requires { std::to_string(self); }
-            {
-                return std::to_string(self);
-            }
-
-            std::string to_string(auto&& self)
-            requires std::convertible_to<decltype(self), std::string>
-            {
-                return self;
-            }
-
-            std::string to_string(auto&& self)
-            requires
-                requires(std::stringstream& stream) { stream << self; }
-                 and
-                (not std::is_arithmetic_v<std::remove_reference_t<decltype(self)>>)
-                 and
-                (not std::convertible_to<decltype(self), std::string>)
-            {
-                std::stringstream stream;
-                stream << self;
-                return stream.str();
             }
         }
 
@@ -204,7 +179,7 @@ namespace constexpr_format
                         }
                         last++;
                     }
-                };
+                }
 
                 return array;
             }
@@ -229,10 +204,10 @@ namespace constexpr_format
             constexpr std::string_view fmt = { string::value, sizeof(string::value) };
             constexpr auto positions = format_array_positions<0, 0, string>();
 
-            std::array<std::string_view , positions.size() + 1> array;
+            std::array<std::string_view, positions.size() + 1> array;
 
             if constexpr (positions.size() == 0) {
-                return std::pair{std::array{fmt}, get_array<1>(array)};
+                return std::pair{std::array{fmt}, get_array<1>(positions)};
             }
 
             array[0] = fmt.substr(0, fmt.find('{'));
@@ -278,7 +253,7 @@ namespace constexpr_format
                 }
             }
 
-            return size;
+            return (size == 0) ? std::size_t(-1) : size;
         }
     }
 
@@ -296,15 +271,6 @@ namespace constexpr_format
         template<typename Self>
         struct string_converter;
 
-        template<typename Self> requires (requires(Self self) { details::string_conversion::to_string(self); })
-        struct string_converter<Self>
-        {
-            std::string operator()(const Self& self) const
-            {
-                return details::string_conversion::to_string(self);
-            }
-        };
-
         template<typename Self>
         concept formatable = requires(Self self)
         {
@@ -317,9 +283,35 @@ namespace constexpr_format
 
     namespace details
     {
+        template<typename... Args>
+        struct format_args
+        {
+            std::tuple<const Args&...> args;
+
+            constexpr format_args(const Args&... args) : args(args...) {}
+
+            // TODO: After create noexcept constexpr arithmetic conversion to string
+            constexpr bool is_noexcept()
+            {
+                // TODO: maybe create #define
+                auto [i, n] =
+                constexpr_for::for_constexpr<sizeof...(Args)>([this] <std::size_t i> (std::integral_constant<std::size_t, i>) {
+                    using arg_type = decltype(std::get<i>(args));
+                    if constexpr (not noexcept(converter<arg_type>(std::declval<arg_type>()))) {
+                        return control_flow::$break;
+                    }
+                });
+
+                return i == n;
+            }
+        };
+
         template<typename string>
         auto combine(auto&&... args)
+            noexcept(false /* format_args::is_noexcept */)
         {
+            constexpr std::string_view fmt = { string::value, sizeof(string::value) };
+
             constexpr auto pair_array = format_array<string>();
 
             constexpr auto array = std::get<0>(pair_array);
@@ -328,10 +320,14 @@ namespace constexpr_format
             constexpr auto supposed_size = max_find(indexes) + 1;
             constexpr auto check_result = indexes_check<supposed_size>(indexes);
 
-            static_assert(check_result != std::size_t(-1),
+            if constexpr (indexes.size() == 0) {
+                return (std::string)fmt;
+            }
+
+            static_assert(check_result != std::size_t(-1) || indexes.size() == 0,
                           "interaction error between position parameters and the number of arguments");
 
-            static_assert(check_result == sizeof...(args),
+            static_assert(check_result == sizeof...(args) || indexes.size() == 0,
                           "interaction error between position parameters and the number of arguments");
 
             std::string result;
@@ -341,13 +337,9 @@ namespace constexpr_format
                 constexpr auto index = indexes[i];
                 using raw_arg_type = decltype(std::get<index>(std::tie(args...)));
                 using arg_type = std::decay_t<raw_arg_type>;
-                result += converter<arg_type>(std::get<index>(std::tie(args...)));
+                result += constexpr_format::converter<arg_type>(std::get<index>(std::tie(args...)));
             });
             result += array.back();
-
-            /*for(auto it : indexes) {
-                std::cout << it << std::endl;
-            }*/
 
             return result;
         }
@@ -355,33 +347,93 @@ namespace constexpr_format
 
     template<typename char_type, char_type... chars>
     auto format(details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
+        noexcept(noexcept(details::combine<decltype(fmt)>(std::forward<decltype(args)>(args)...)))
     {
         return details::combine<decltype(fmt)>(std::forward<decltype(args)>(args)...);
     }
 
     template<typename char_type, char_type... chars>
     void print(std::basic_ostream<char_type>& out, details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
+        noexcept(noexcept(format(fmt, std::forward<decltype(args)>(args)...)))
     {
         out << format(fmt, std::forward<decltype(args)>(args)...);
     }
 
     template<typename char_type, char_type... chars>
     void print(details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
+        noexcept(noexcept(format(fmt, std::forward<decltype(args)>(args)...)))
     {
         std::cout << format(fmt, std::forward<decltype(args)>(args)...);
     }
 
     template<typename char_type, char_type... chars>
     void println(std::ostream& stream, details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
+        noexcept(noexcept(format(fmt, std::forward<decltype(args)>(args)...)))
     {
         stream << format(fmt, std::forward<decltype(args)>(args)...) << "\n";
     }
 
     template<typename char_type, char_type... chars>
     void println(details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
+        noexcept(noexcept(format(fmt, std::forward<decltype(args)>(args)...)))
     {
         std::cout << format(fmt, std::forward<decltype(args)>(args)...) << "\n";
     }
 }
+
+
+
+
+// CONVERTION OVERRIDE REGION
+
+// ##################################
+// ##################################
+namespace constexpr_format::string_conversion
+{
+    template<typename Self>
+    requires
+        requires(Self self) { std::to_string(self); }
+    struct string_converter<Self>
+    {
+        std::string operator()(Self self) const
+        // TODO: create constexpr noexcept integral conversion
+            noexcept(false)
+        {
+            return std::to_string(self);
+        }
+    };
+
+    template<typename Self>
+    requires
+        std::convertible_to<Self, std::string>
+    struct string_converter<Self>
+    {
+        std::string operator()(const Self& self) const
+            noexcept(noexcept(static_cast<std::string>(self)))
+        {
+            return static_cast<std::string>(self);
+        }
+    };
+
+    template<typename Self>
+    requires
+        requires(Self self, std::stringstream& stream) { stream << self; }
+         and
+        (not requires(Self self) { std::to_string(self); })
+    struct string_converter<Self>
+    {
+        std::string operator()(const Self& self) const
+            // TODO: create fully noexcept check
+            noexcept(noexcept(std::declval<std::stringstream>() << self))
+        {
+            std::stringstream stream;
+            stream << self;
+            return stream.str();
+        }
+    };
+}
+// ##################################
+// ##################################
+
 
 #endif //CONSTEXPR_FORMAT
