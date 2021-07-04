@@ -420,6 +420,8 @@ namespace constexpr_format::string_conversion
     requires
         requires(Self self, std::stringstream& stream) { stream << self; }
          and
+        (not std::convertible_to<Self, std::string>)
+         and
         (not requires(Self self) { std::to_string(self); })
     struct string_converter<Self>
     {
