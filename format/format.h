@@ -367,7 +367,7 @@ namespace constexpr_format
     }
 
     template<typename char_type, char_type... chars>
-    void println(std::ostream& stream, details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
+    void println(std::basic_ostream<char_type>& stream, details::sta::string<char_type, chars...> fmt, formatable auto&&... args)
         noexcept(noexcept(format(fmt, std::forward<decltype(args)>(args)...)))
     {
         stream << format(fmt, std::forward<decltype(args)>(args)...) << "\n";
