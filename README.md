@@ -1,14 +1,6 @@
 # constexpr-format
 You are annoyed by the long compilation time when you use fmt lib. Now your code will take even longer to compile, and programs will run even faster.
 
-## Preview features
-
-- **[format-indexes]**
-=======
-#### [release branch](https://github.com/uselessgoddess/constexpr-format/tree/main) -> [Features after the final review - you can work]
-#### [beta branch](https://github.com/uselessgoddess/constexpr-format/tree/beta) -> [Features after small review - you can work with preview features]
-#### [alpha branch](https://github.com/uselessgoddess/constexpr-format/tree/alpha) -> [Only for the developing - non-stable features]
-
 ## Getting started
 ### Hello world
 ```cpp
@@ -122,35 +114,5 @@ struct fmt::string_converter<std::pair<T1, T2>>
 };
 ```
 
-### Future conversion 
-**Possible syntax**
-```cpp
-#include <format.h>
-
-namespace fmt = constexpr_format;
-using namespace fmt::literals;
-
-template<typename T1, typename T2>
-struct formatable_pair
-{
-    T1 first;
-    T2 second;
-    
-    void fmt(fmt::formatter& fmt) noexcept
-    {
-        fmt.write_string(std::format("({}, {})"_fmt, first, second));
-    }
-};
-
-template<fmt::formatable T1, fmt::formatable T2>
-struct fmt::string_converter<std::pair<T1, T2>>
-{
-    void fmt(fmt::formatter& fmt, const std::pair<T1, T2>& self) const noexcept 
-    {
-        fmt.write_string(std::format("({}, {})"_fmt, self.first, self.second));
-    }
-};
-```
-
 ### Performance
-#### [small benchmark with std::chrono (it is true)](https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAM1QDsCBlZAQwBtMQBGAFlJvoCqAZ0wAFAB4gA5AAYppAFZdSrZrVDIApACYAQjt2kR7ZATx1KmWugDCqVgFcAtrRAA2UlfQAZPLUwAcs4ARpjEXACspAAOqEKE5rR2ji7uMXEJdL7%2BQU6h4ZxRxpimiQwEzMQEyc6uHsWldOWVBNmBIWGRRhVVNan1Pa1%2B7XmdhQCURqgOxMgcUjoAzH7IjlgA1JqLNsgIxHSoW9iaMgCCJ%2Bfay7SrDhs62ggEBNFCIAD078TMAO4AdMBCAgHMEHCJZnQCFYCH80E53mDMOwhEJgBgsCj3mhaEIoeJosQALQ0YhOZgEd5saIIZjvElkin08l/BAPC7sq4rNaYTbbKhOCloYiYFlHDnXW73PkCukkBmixbHM4XPwEdZkvwQcbsgDs%2BjO60N61x6BAIHiAC9MAB9NXAVioYJsa2YWK7XkAEXWnDAshkMl9/pkW315wNRs%2B6wAKgB5D0xkDrRHGgimkACzgATkzix14214cNJrNQm%2B1ggxZAZicmAgtAcrFY0QIxHzIfZhc2eouRt761ozBrQmizDm635aq2XuxuMw%2BOI1qZBHbnd7YL8wH7g8ww9HPInZtYhDCbCEK7Dpz7RsrlptatdqF2Qk963tjudD9256vRdTJZbG4psQG7nj2P7MA4RApi0L6Vrs%2By0KgJYAJ6zk41qrI%2BADWZqIT8WqgauRo/AgeDsOsECfggQiEoS4xdqGP59riwHqC%2BB4gEuEBsnqwY6l6mh6pwgkeg8i4CqQ6xlugWqSdJWraosjE/iJYFXhxBKqqwtDcdo2heFJO4NgQiaCfo/FiROkksRuim6OskaafQ6xQYhaqoM2eBOHgVodpe4GQag6wGVOKZpvBBwoWhGEOsgOEgHhBFKWpfYaaxBDabp2jVjyU55YqDEiU4Z56eJBCkClTFVXBeyRSA6AzOSiQYcwuJbDYNUIUh6ZkUeIjYugZ6KpR1jrIS0FVOMsLTPQCnfkaqnKp2ZmVdef7mj5d7BW61Evm%2BTqsC6O3zVeN4AWxNnqIR/lXhBUG4jBoWdXVQioVC6GYXFuGoPhdl%2BUxJFkTylE7TRdGFURp3nZuoUcVxPG6HxAlCapelyWoMmTFJGNzclkNdqJ%2BNpaqWUGcKQjGaZ3YWRENi0A81nQ39S03X2d1BSFixes9iFRe9MXYd9v0nalApmk5BBZTlnr5dghX8cVmi0/TaOrVVvY891DXfGYdAtW12ya2a3mNng/V0INRwjegY0TQQU1oA4s1tnjrOLRevYrfjN6bba22PrtoX7R%2Bx2u0xZ2sZul3ANdTHs3bsHrRFvPmm9mAfbF8WJczHs/oD5EgwHYP0V7rNMZGUakc%2BZvrMwwTTGqCA/esM54gSi5yuSZpLusPwkFhZ74xr63R%2BsCBItEYQi0x49NmEmx6E961ENa0cQPJLvKers%2BT8QC/6FzC/aEf08/jv88GEvaYr2vG85%2BrhqRv9D%2Bj6F5/EKfhru%2BHScN7yNjtSPmTIyrATJH3/oA1%2B2xAFsmVmyV2ata6BWCqNK%2BZpk7dVetFT6WcfpJS3qLEyIAJZSy8rlLmst5YekVnA1WQ91ZG3qo1XWtB9bLkNknWqKcTZ9RKBbIa2Bra2wepNaaTtJabxSu7d2UhJisGkBEeQrhZDyCQlIABi89DGmmLMXKVxODyBMio/MpAcIRBkCoaQ3AlHSDkKQNR8g3gWKMXISYcBYAwEQCgVAThohAzIBQCAcI/HsHCMATgMhtB8DIlCYgbwIDBFsfIYIfhKjIWkAY0gcIaz0BjLQVg6SVGkCwGSdQ7AknFLwMKUoAA3HcFS5wlEgvMOxqokQVKPMEb4xBkJ2CwBkwxwEnADMmPwRgLByk8D4JCYQYhJBFKUJwFQagNCXz0CoPAwQ3iwAHDWTiEk6nhCkDqf0sjJgeRYW8KQhIYxjRNFOLQmjdDaDsQ0FhlhrB9FcEsrwbRcj5GULEeILCvmAoyCwv5HQChGCRCUFhzRej2FqMoN5ZRBiQtGNCkR1QkWpCWdijFALOCTCEDouYXA5EKJsUUtR4gAAcbhCRuG4K%2BZAyBvQyD%2BMfCAuBCAkAXosJZ6w7C%2BP8QK4lwq1m6EMUkkxZiLHyKkNY0gwzzGkGUXYhxRgQDONlaQdxXiG7REguQSgwT/HKEwPgIg0KxlMDYBwKZYzZkSAqT8b40QRmWKkIo9VFS1Exkgsa9yVB1j0sZcy1l7KIlcooiKkJF99HjBlcYyY49mBYHCLJRVyrVUWI1ao6QjidWkBcWc0xIA1WKsWNSzVRbS2yspVIbQtbC1SBTa4yYhz4gWG4EAA%3D%3D)
+#### [small benchmark (it is true)](https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAM1QDsCBlZAQwBtMQBGAFlJvoCqAZ0wAFAB4gA5AAYppAFZdSrZrVDIApACYAQjt2kR7ZATx1KmWugDCqVgFcAtrRABON6SvoAMnlqYAHLOAEaYxCAAzJykAA6oQoTmtHaOLu6e8YlmdH4BwU5hEdFGmCY5tAwEzMQEqc6uHqXlyVU1BHlBoeFRMULVtfXpTf3tnQVFvQCURqgOxMgcUjqR/siOWADUmpE2YbTICE41ANYA9PuHx8QnAHQIO9iaMgCCz2/aqwcbmNva2ggCARYkIQGczsRmAB3W7AQgIBwhBwiBZ0AhWAi3NBOM7IsqYIRCYAYLCEs5oWj9TDiWLEAC0NGIxwIZzYsQQzDOjOZXJIzPuOm072FrxWWCo/l%2BADEALIAFQA%2BgAJbAvAAi2AASgqAPKBHwATW2os%2Bax%2B212VCcLLQxEwAsiTxNX3WDi2OxsVpZ3OYmIejpFL1GZmQmwAbqg8OhNlLrRBLkdTiAQG10ToAGybYOYKbbADs%2Blem2Lm0ZmwgzAcRE2Cs2ICz1XRuc0BfeJfbDfQyf6xH8wAbvfUFrVpetyZ9BAggqnBZkLbVUxnuk486mLd0c7zC6XK63a9nq53q/Xm%2B3693C5Ph/Px4Pe6Pe7X/1Im0h1ggM1fanQH7XkULLwdiWCbXCcyZqqggSoAQOqxGYTh4AAXpgEA9n2f4Ae287Clu7y6NggQ2EqMovJqADSECxgQGGBsGeChhGUYxtadiUuiNLEDYCCYMgJzxlYVxJimjaYBmDa%2Bjm%2BaYSWZYVlWqA1nW4lNlJbZAZ23YEIO/ZoUOOwjl6458r6lHygqDBypqACSgQAOJTv8S6nouN57le96uZed5ngWF77hu16%2BbeAUeUFbneS5YULk%2B2ifm%2BP5xd%2Bv47NJQEgUJEFQTBcF4AhyGoVp6EpWpxbYaKuGvPhhHEaRFFUaxVIcVxPEnDRoqvHRDGRtGDXsbSUrGZO6U3MmqaidombZs2rZFiWtDME4BKxMwiyjgQw6bBSjW0gqE7FbNxbIn2mzzYtQjLathkgKwhDhGwQj7W8B2liQ5aVtWtb1lNqnPe2/RdiAuk6YVemRAZY4gBODnaE5gXLsFzkPl5IU%2BfD4Uo5FaPI4jnn%2BTjUVTDFu3Wi%2B8UfqTSWE496mbMNYEgJl0GwfBSEoUDbWASWZVvBVLxVURJHkRAvXUv1g0c3hBEC7VCokTZH4pVIMysNIACs8iuLI8ioNINgGAYWZzAsvwrJw8gENIciE6QYGqzIKjSNwGuW9r0jyKC9sW1rMxwLAMCICgqBOLEeDsGQFAQNiIdhyAwCcDI2h8KH6LEKC8Yu6QIT%2BDUACe0hm6Q2KLfQOq0Kweda6QWDHOo7AZ/gdqmHgYYEhn1I8VWSxyOQ9BlBnN0hJCxA53YWD5%2BbvZOOPMz8IwLB1zwfBosIYiSJXSgxKo6goPregqHgISgrAp0cHTpAtxEWkOLQrWkBAJ%2BQyTF/SHmMhWzMqA5XQoJSHSOqRJsOk/19JaD0AYbQMhixAKgQAdTYKwQBapAgal0AIWyUDWB00AawOCCA7TMGjO7fETcLAQG8EMVwMRvDjG6BEGIWQkh0AocoBhFQaGFB6H0YhFQ2iDHsA0ZQxgeI8IGB0SUExOFGFEcwvooj2GTE4DMIQRtFhcGVmrZ2lcdZSHEAADnTHSdM3BNjAGQKGeOtxtDllwIQV6psXx2GDqHcIfxoi5j1mAvQ5sXbW1tvbFWUgnakCnnbUgmtu7aPdiAT2Pi77%2BwgEgOYwIqzkEoFHZxdCvD4CIJk2eTA2AcEXrPFeEgM5QkhLEaeDspDqzCRnbROoqyxCrJsVAVBNh6IMUYkxZjNgWKscLIO0cXGmymN472MxuIEJ6OTAJQSQn23Ca7KQUSYkTJtiAUJATIiaIiW7UgXt37VO0Ls5Z4yjkX0SBYbgQA%3D%3D)
