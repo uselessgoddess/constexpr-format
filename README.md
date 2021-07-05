@@ -113,7 +113,7 @@ namespace fmt = constexpr_format;
 using namespace fmt::literals;
 
 template<fmt::formatable T1, fmt::formatable T2>
-struct fmt::to_string<std::pair<T1, T2>>
+struct fmt::string_converter<std::pair<T1, T2>>
 {
     std::string operator()(const std::pair<T1, T2> pair) const noexcept ( /* after creating noexcept integral conversion in new version */ )
     {
@@ -143,7 +143,7 @@ struct formatable_pair
 };
 
 template<fmt::formatable T1, fmt::formatable T2>
-struct fmt::to_string<std::pair<T1, T2>>
+struct fmt::string_converter<std::pair<T1, T2>>
 {
     void fmt(fmt::formatter& fmt, const std::pair<T1, T2>& self) const noexcept 
     {
