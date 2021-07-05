@@ -329,14 +329,28 @@ namespace constexpr_format
                           "interaction error between position parameters and the number of arguments");
 
             std::string result;
-            for_constexpr<array.size() - 1>([&] <std::size_t i> (std::integral_constant<std::size_t, i>) {
-                result += array[i];
+            std::size_t result_size = 0;
 
+            auto args_tuple = std::tie(args...);
+
+            std::vector<std::string> args_as_string;
+            args_as_string.reserve(std::tuple_size_v<decltype(args_tuple)>);
+
+            for_constexpr<array.size() - 1>([&] <std::size_t i> (std::integral_constant<std::size_t, i>) {
                 constexpr auto index = indexes[i];
                 using raw_arg_type = decltype(std::get<index>(std::tie(args...)));
                 using arg_type = std::decay_t<raw_arg_type>;
-                result += constexpr_format::converter<arg_type>(std::get<index>(std::tie(args...)));
+
+                std::string as_string = constexpr_format::converter<arg_type>(std::get<index>(args_tuple));
+                result_size += array[i].size() + as_string.size();
+                args_as_string.push_back(std::move(as_string));
             });
+
+            result.reserve(result_size);
+            for (std::size_t i = 0; i < array.size() - 1; i++) {
+                result += array[i];
+                result += args_as_string[i];
+            }
             result += array.back();
 
             return result;
