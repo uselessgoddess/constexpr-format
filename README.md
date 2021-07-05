@@ -90,11 +90,14 @@ int main()
     namespace fmt = constexpr_format;
     using namespace fmt::literals;
 
-    fmt::print("{} + {} == {}"_fmt, pair{1, 2}, pair{2, 1}, pair{3, 3});
+    fmt::print("{0} + {1} == {1} + {0} == {2}"_fmt, 
+    /* #0 */   pair{1, 2}, 
+    /* #1 */   pair{2, 1}, 
+    /* #2 */   pair{3, 3});
 }
 ```
 
-#### built in converting 
+#### temporary built in converting 
 ```cpp
 #include <format.h>
 
@@ -125,7 +128,7 @@ struct formatable_pair
     T1 first;
     T2 second;
     
-    constexpr void fmt(fmt::formatter& fmt) noexcept
+    void fmt(fmt::formatter& fmt) noexcept
     {
         fmt.write_string(std::format("({}, {})"_fmt, first, second));
     }
@@ -134,7 +137,7 @@ struct formatable_pair
 template<fmt::formatable T1, fmt::formatable T2>
 struct fmt::to_string<std::pair<T1, T2>>
 {
-    constexpr void fmt(fmt::formatter& fmt, const std::pair<T1, T2>& self) const noexcept 
+    void fmt(fmt::formatter& fmt, const std::pair<T1, T2>& self) const noexcept 
     {
         fmt.write_string(std::format("({}, {})"_fmt, self.first, self.second));
     }

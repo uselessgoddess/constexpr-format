@@ -136,7 +136,7 @@ namespace constexpr_format
                 }
             }
 
-            return indexes xor without_indexes;
+            return !indexes or !without_indexes;
         }
 
         constexpr auto match_aggregate_size(std::string_view slice)
@@ -157,9 +157,6 @@ namespace constexpr_format
             if constexpr (fmt.empty()) {
                 return std::array<array_type, 0>{};
             }
-
-            //static_assert(slice.find('{') == slice.find('}') - 1 /* ==> ignore */ || slice.find('{') == std::string_view::npos,
-            //    "Format violation {}, syntax error");
 
             if constexpr (slice.find('{') != std::string_view::npos && start < fmt.size() - 1) {
                 return format_array_positions<start + slice.find('{') + 2, count + 1, string>();
@@ -213,8 +210,8 @@ namespace constexpr_format
 
             array[0] = fmt.substr(0, fmt.find('{'));
             for (std::size_t i = 0; i < positions.size() - 1; i++) {
-                auto position = std::get<0>(positions[i]);
-                auto next_position = std::get<0>(positions[i + 1]);
+                auto [position, _] = positions[i];
+                auto [next_position, __] = positions[i + 1];
                 auto distance = next_position - position;
 
                 auto aggregate_size = match_aggregate_size(fmt.substr(position));
