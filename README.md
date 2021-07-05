@@ -4,6 +4,10 @@ You are annoyed by the long compilation time when you use fmt lib. Now your code
 ## Preview features
 
 - **[format-indexes]**
+=======
+#### [release branch](https://github.com/uselessgoddess/constexpr-format/tree/main) -> [Features after the final review - you can work]
+#### [beta branch](https://github.com/uselessgoddess/constexpr-format/tree/beta) -> [Features after small review - you can work with preview features]
+#### [alpha branch](https://github.com/uselessgoddess/constexpr-format/tree/alpha) -> [Only for the developing - non-stable features]
 
 ## Getting started
 ### Hello world
